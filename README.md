@@ -10,6 +10,7 @@ This is Twenty, a minimal, multi-page responsive site template for HTML5 UP.
 Fully responsive, built on HTML5/CSS3, and CCA licensed.
 
 Credits:
+	
 	* Icons:
 		* Font Awesome (fontawesome.io)
 	* Other:
