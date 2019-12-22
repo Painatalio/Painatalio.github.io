@@ -6,92 +6,97 @@
  * From: https://jsfiddle.net/rsb2097/xeppz7L6/
  */
 function selectCountryOnGeneralAnalysis(countryName) {
-    // If the country was already selected.
-    if (generalMapPaths.filter(d => d.properties.name === countryName).style("fill") !== "rgb(220, 173, 139)") {
-        // Changes the color of the country, in the map, to the default color.
-        generalMapPaths.filter(d => d.properties.name === countryName).style("fill", "rgb(220, 173, 139)");
+    try {
+        // If the country was already selected.
+        if (generalBarsRect.filter(d => d.Country === countryName).style("fill") !== "rgb(220, 173, 139)") {
+            // Changes the color of the country, in the map, to the default color.
+            generalMapPaths.filter(d => d.properties.name === countryName).style("fill", "rgb(220, 173, 139)");
 
-        // Changes the color of the country bar, in the bar chart, to the default color.
-        generalBarsRect.filter(d => d.Country === countryName).style("fill", "rgb(220, 173, 139)");
+            // Changes the color of the country bar, in the bar chart, to the default color.
+            generalBarsRect.filter(d => d.Country === countryName).style("fill", "rgb(220, 173, 139)");
 
-        // Removes the row, in the comparison table, corresponding to the country,
-        // if there's more than one selected country.
-        if (legendOptions.length > 1) {
-            generalTable.select("#" + countryName.replace(/\s/g, '') + "GeneralRow").remove();
-        }
+            // Removes the row, in the comparison table, corresponding to the country,
+            // if there's more than one selected country.
+            if (legendOptions.length > 1) {
+                generalTable.select("#" + countryName.replace(/\s/g, '') + "GeneralRow").remove();
+            }
 
-        // Removes the country values from the radar plot, and updates the available colors to use.
-        for (let index in legendOptions) {
-            if (legendOptions[index] === countryName && legendOptions.length > 1) {
-                legendOptions.splice(index, 1);
-                selectedCountriesRadarPlot.splice(index, 1);
-                drawRadarCharts(selectedCountriesRadarPlot, legendOptions);
-                break;
+            // Removes the country values from the radar plot, and updates the available colors to use.
+            for (let index in legendOptions) {
+                if (legendOptions[index] === countryName && legendOptions.length > 1) {
+                    legendOptions.splice(index, 1);
+                    selectedCountriesRadarPlot.splice(index, 1);
+                    drawRadarCharts(selectedCountriesRadarPlot, legendOptions);
+                    break;
+                }
             }
         }
-    }
-    // If the country wasn't already selected.
-    else {
-        let selectedCountry;
+        // If the country wasn't already selected.
+        else {
+            let selectedCountry;
 
-        // Checks if the selected country exists, so it may be added to the comparison table.
-        for (let index in countriesData) {
-            if (countriesData[index].Country === countryName) {
-                selectedCountry = countriesData.slice(index, parseInt(index)+1);
-                break;
+            // Checks if the selected country exists, so it may be added to the comparison table.
+            for (let index in countriesData) {
+                if (countriesData[index].Country === countryName) {
+                    selectedCountry = countriesData.slice(index, parseInt(index)+1);
+                    break;
+                }
             }
-        }
 
-        // Adds the selected country values as a row in the comparison table.
-        generalTable.append('tr')
-            .attr('id', countryName.replace(/\s/g, '') + "GeneralRow")
-            .data(selectedCountry)
-            .selectAll('td')
-            .data(function(row, i) {
-                return tableColumns.map(function(c) {
-                    // compute cell values for this specific row
-                    let cell = {};
+            // Adds the selected country values as a row in the comparison table.
+            generalTable.append('tr')
+                .attr('id', countryName.replace(/\s/g, '') + "GeneralRow")
+                .data(selectedCountry)
+                .selectAll('td')
+                .data(function(row, i) {
+                    return tableColumns.map(function(c) {
+                        // compute cell values for this specific row
+                        let cell = {};
 
-                    d3.keys(c).forEach(function(k) {
-                        cell[k] = typeof c[k] == 'function' ? c[k](row,i) : c[k];
+                        d3.keys(c).forEach(function(k) {
+                            cell[k] = typeof c[k] == 'function' ? c[k](row,i) : c[k];
+                        });
+
+                        return cell;
                     });
-
-                    return cell;
+                })
+                .enter()
+                .append('td')
+                .html(function (d) {
+                    return d.html;
+                })
+                .attr('class', function (d) {
+                    return d.cl + " generalTableRow";
                 });
-            })
-            .enter()
-            .append('td')
-            .html(function (d) {
-                return d.html;
-            })
-            .attr('class', function (d) {
-                return d.cl;
+
+            // Inserts the country values into the radar plot.
+            for (let index in radarPlotData) {
+                if (radarPlotData[index][0].name === countryName && !legendOptions.includes(countryName)) {
+                    let country = Object.create(radarPlotData[index]);
+                    country.splice(0, 1);
+                    selectedCountriesRadarPlot.push(country);
+                    legendOptions.push(countryName);
+                    drawRadarCharts(selectedCountriesRadarPlot, legendOptions);
+                    break;
+                }
+            }
+        }
+
+        // Changes the colors of the selected countries to be in accord with the radar plot colors.
+        for (let index in legendOptions) {
+            // Changes the color of the selected countries in the colorized map of the general analysis section.
+            generalMapPaths.filter(d => d.properties.name === legendOptions[index]).style("fill", function (d) {
+                return generalColorScale(legendOptions.indexOf(d.properties.name));
             });
 
-        // Inserts the country values into the radar plot.
-        for (let index in radarPlotData) {
-            if (radarPlotData[index][0].name === countryName && !legendOptions.includes(countryName)) {
-                let country = Object.create(radarPlotData[index]);
-                country.splice(0, 1);
-                selectedCountriesRadarPlot.push(country);
-                legendOptions.push(countryName);
-                drawRadarCharts(selectedCountriesRadarPlot, legendOptions);
-                break;
-            }
+            // Changes the color of the bars of the selected countries in the bar chart in the general analysis section.
+            generalBarsRect.filter(d => d.Country === legendOptions[index]).style("fill", function (d) {
+                return generalColorScale(legendOptions.indexOf(d.Country));
+            });
         }
     }
-
-    // Changes the colors of the selected countries to be in accord with the radar plot colors.
-    for (let index in legendOptions) {
-        // Changes the color of the selected countries in the colorized map of the general analysis section.
-        generalMapPaths.filter(d => d.properties.name === legendOptions[index]).style("fill", function (d) {
-            return generalColorScale(legendOptions.indexOf(d.properties.name));
-        });
-
-        // Changes the color of the bars of the selected countries in the bar chart in the general analysis section.
-        generalBarsRect.filter(d => d.Country === legendOptions[index]).style("fill", function (d) {
-            return generalColorScale(legendOptions.indexOf(d.Country));
-        });
+    catch (error) {
+        alert("Country unavailable for map selection! Try the bar chart!");
     }
 }
 
@@ -100,9 +105,59 @@ function selectCountryOnGeneralAnalysis(countryName) {
  * From: https://medium.com/@ivan.ha/using-d3-js-to-plot-an-interactive-map-34fbea76bd78
  */
 function resetGeneralMap() {
+    // Resets the color of all the countries to the default in the colorized map.
     generalMapPaths.style("fill", "rgb(220, 173, 139)");
-    generalBarsRect.style("fill", "rgb(220, 173, 139)");
+
+    // Changes the color of Finland country as an example.
+    generalMapPaths.filter(d => d.properties.name === "Finland").style("fill", generalColorScale(0));
+
+    // Resets the zoom to the default value.
     generalMap.call(generalZoom.transform, d3.zoomIdentity.scale(1));
+
+    // Resets the colors of the bars to the default in the bar chart.
+    generalBarsRect.style("fill", "rgb(220, 173, 139)");
+
+    // Changes the color of Finland country as an example.
+    generalBarsRect.filter(d => d.Country === "Finland").style("fill", generalColorScale(0));
+
+    // Removes all the rows in the comparison table.
+    generalTable.selectAll(".generalTableRow").remove();
+
+    let firstCountry = countriesData.slice(0, 1);
+
+    // Adds the Finland country values as an example in the comparison table.
+    generalTable.append('tr')
+        .attr('id', "FinlandGeneralRow")
+        .data(firstCountry)
+        .selectAll('td')
+        .data(function(row, i) {
+            return tableColumns.map(function(c) {
+                // compute cell values for this specific row
+                let cell = {};
+
+                d3.keys(c).forEach(function(k) {
+                    cell[k] = typeof c[k] == 'function' ? c[k](row,i) : c[k];
+                });
+
+                return cell;
+            });
+        })
+        .enter()
+        .append('td')
+        .html(function (d) {
+            return d.html;
+        })
+        .attr('class', function (d) {
+            return d.cl + " generalTableRow";
+        });
+
+    firstCountry = Object.create(radarPlotData[0]);
+
+    // Resets the countries present on the radar plot legend.
+    legendOptions = [firstCountry.splice(0, 1)[0].name];
+
+    // Draws the radar plot with only the Finland country as an example.
+    drawRadarCharts([firstCountry], legendOptions);
 }
 
 /*
@@ -121,6 +176,7 @@ function clickToZoomGeneralMap(zoomStep) {
  * From: https://medium.com/@ivan.ha/using-d3-js-to-plot-an-interactive-map-34fbea76bd78
  */
 function drawGeneralMap(geoData) {
+    // Draws the country.
     generalMapPaths = generalMap.append("g")
         .selectAll("path")
         .data(geoData.features)
@@ -133,7 +189,28 @@ function drawGeneralMap(geoData) {
         .attr("cursor", "pointer")
         .on("click", function (d) {
             selectCountryOnGeneralAnalysis(d.properties.name);
+        })
+        .on("mouseover", function (d) {
+            generalMap.select("#" + d.properties.name.replace(/\s/g, '') + "Tile").style("display", "block");
+        })
+        .on("mouseout", function (d) {
+            generalMap.select("#" + d.properties.name.replace(/\s/g, '') + "Tile").style("display", "none");
         });
+
+    //Displays the country name.
+    generalMap.append("g")
+        .selectAll("text")
+        .data(geoData.features)
+        .enter()
+        .append("text")
+        .attr("id", d => d.properties.name.replace(/\s/g, '') + "Tile")
+        .attr("transform", d => `translate(${path.centroid(d)})`)
+        .attr("text-anchor", "middle")
+        .attr("font-size", 5)
+        .style("fill", "solid black")
+        .style("font-weight", "bold")
+        .style("display", "none")
+        .text(d => d.properties.name);
 
     // Add the first country as an example.
     generalMapPaths.filter(d => d.properties.name === "Finland").style("fill", generalColorScale(0));
@@ -147,88 +224,94 @@ function drawGeneralMap(geoData) {
  * From: https://www.d3-graph-gallery.com/graph/parallel_basic.html
  */
 function selectCountryOnDetailedAnalysis(countryName) {
-    // If the country was already selected.
-    if (detailedMapPaths.filter(d => d.properties.name === countryName).style("fill") !== "rgb(220, 173, 139)") {
-        // If there's more than one country selected.
-        if (detailedTable.selectAll('tr')._groups[0].length > 2) {
-            detailedMapPaths.filter(d => d.properties.name === countryName).style("fill", "rgb(220, 173, 139)");
-            detailedBarsRect.filter(d => d.Country === countryName).style("fill", "rgb(220, 173, 139)");
-            detailedTable.select("#" + countryName.replace(/\s/g, '') + "DetailedRow").remove();
-            parallelPlot.select("#" + countryName.replace(/\s/g, '')).remove();
-        }
-    }
-    // If the country wasn't already selected.
-    else {
-        detailedMapPaths.filter(d => d.properties.name === countryName)
-            .style("fill", detailedColorScale(countries.indexOf(countryName)));
-        detailedBarsRect.filter(d => d.Country === countryName)
-            .style("fill", detailedColorScale(countries.indexOf(countryName)));
-        let selectedCountry;
-
-        // Searches for the selected country data to be inserted into the comparison table,
-        // in the detailed analysis section.
-        for (let index in countriesData) {
-            if (countriesData[index].Country === countryName) {
-                selectedCountry = countriesData.slice(index, parseInt(index)+1);
-                break;
+    try {
+        // If the country was already selected.
+        if (detailedBarsRect.filter(d => d.Country === countryName).style("fill") !== "rgb(220, 173, 139)") {
+            // If there's more than one country selected.
+            if (detailedTable.selectAll('tr')._groups[0].length > 2) {
+                detailedMapPaths.filter(d => d.properties.name === countryName).style("fill", "rgb(220, 173, 139)");
+                detailedBarsRect.filter(d => d.Country === countryName).style("fill", "rgb(220, 173, 139)");
+                detailedTable.select("#" + countryName.replace(/\s/g, '') + "DetailedRow").remove();
+                parallelPlot.select("#" + countryName.replace(/\s/g, '')).remove();
             }
         }
+        // If the country wasn't already selected.
+        else {
+            detailedMapPaths.filter(d => d.properties.name === countryName)
+                .style("fill", detailedColorScale(countries.indexOf(countryName)));
+            detailedBarsRect.filter(d => d.Country === countryName)
+                .style("fill", detailedColorScale(countries.indexOf(countryName)));
+            let selectedCountry;
 
-        // Inserts the country's data in a row of the table.
-        detailedTable.append('tr')
-            .attr('id', countryName.replace(/\s/g, '') + "DetailedRow")
-            .data(selectedCountry)
-            .selectAll('td')
-            .data(function(row, i) {
-                return tableColumns.map(function(c) {
-                    // compute cell values for this specific row
-                    let cell = {};
+            // Searches for the selected country data to be inserted into the comparison table,
+            // in the detailed analysis section.
+            for (let index in countriesData) {
+                if (countriesData[index].Country === countryName) {
+                    selectedCountry = countriesData.slice(index, parseInt(index)+1);
+                    break;
+                }
+            }
 
-                    d3.keys(c).forEach(function(k) {
-                        cell[k] = typeof c[k] == 'function' ? c[k](row,i) : c[k];
+            // Inserts the country's data in a row of the table.
+            detailedTable.append('tr')
+                .attr('id', countryName.replace(/\s/g, '') + "DetailedRow")
+                .data(selectedCountry)
+                .selectAll('td')
+                .data(function(row, i) {
+                    return tableColumns.map(function(c) {
+                        // compute cell values for this specific row
+                        let cell = {};
+
+                        d3.keys(c).forEach(function(k) {
+                            cell[k] = typeof c[k] == 'function' ? c[k](row,i) : c[k];
+                        });
+
+                        return cell;
+                    });
+                })
+                .enter()
+                .append('td')
+                    .html(function (d) {
+                        return d.html;
+                    })
+                    .attr('class', function (d) {
+                        return d.cl + " detailedTableRow";
                     });
 
-                    return cell;
-                });
-            })
-            .enter()
-            .append('td')
-                .html(function (d) {
-                    return d.html;
+            // Extract the list of dimensions to keep in the plot. Keep all except the column called Country.
+            let dimensions = d3.keys(countriesData[0]).filter(function(d) { return d !== "Country" });
+
+            // For each dimension, build a linear scale. Store all in a y object.
+            let y = {};
+
+            for (let i in dimensions) {
+                const name = dimensions[i];
+
+                y[name] = d3.scaleLinear()
+                    .domain(d3.extent(countriesData, function(d) { return +d[name]; }))
+                    .range([height, 0])
+            }
+
+            // Build the X scale -> find the best position for each Y axis.
+            let x = d3.scalePoint()
+                .range([0, width])
+                .padding(1)
+                .domain(dimensions);
+
+            // Add the selected country in the parallel plot.
+            parallelPlot.append("path")
+                .data(selectedCountry)
+                .attr("d",  function (d) {
+                    return d3.line()(dimensions.map(function(p) { return [x(p), y[p](d[p])]; }));
                 })
-                .attr('class', function (d) {
-                    return d.cl;
-                });
-
-        // Extract the list of dimensions to keep in the plot. Keep all except the column called Country.
-        let dimensions = d3.keys(countriesData[0]).filter(function(d) { return d !== "Country" });
-
-        // For each dimension, build a linear scale. Store all in a y object.
-        let y = {};
-
-        for (let i in dimensions) {
-            const name = dimensions[i];
-
-            y[name] = d3.scaleLinear()
-                .domain(d3.extent(countriesData, function(d) { return +d[name]; }))
-                .range([height, 0])
+                .attr("id", countryName.replace(/\s/g, ''))
+                .attr("class", "parallelLine")
+                .style("fill", "none")
+                .style("stroke", detailedColorScale(countries.indexOf(countryName)));
         }
-
-        // Build the X scale -> find the best position for each Y axis.
-        let x = d3.scalePoint()
-            .range([0, width])
-            .padding(1)
-            .domain(dimensions);
-
-        // Add the selected country in the parallel plot.
-        parallelPlot.append("path")
-            .data(selectedCountry)
-            .attr("d",  function (d) {
-                return d3.line()(dimensions.map(function(p) { return [x(p), y[p](d[p])]; }));
-            })
-            .attr("id", countryName.replace(/\s/g, ''))
-            .style("fill", "none")
-            .style("stroke", detailedColorScale(countries.indexOf(countryName)));
+    }
+    catch (error) {
+        alert("Country unavailable for map selection! Try the bar chart!");
     }
 }
 
@@ -237,9 +320,85 @@ function selectCountryOnDetailedAnalysis(countryName) {
  * From: https://medium.com/@ivan.ha/using-d3-js-to-plot-an-interactive-map-34fbea76bd78
  */
 function resetDetailedMap() {
+    // Resets the color of all the countries to the default in the colorized map.
     detailedMapPaths.style("fill", "rgb(220, 173, 139)");
-    detailedBarsRect.style("fill", "rgb(220, 173, 139)");
+
+    // Changes the color of Finland country as an example.
+    detailedMapPaths.filter(d => d.properties.name === "Finland").style("fill", detailedColorScale(0));
+
+    // Resets the zoom to the default value.
     detailedMap.call(detailedZoom.transform, d3.zoomIdentity.scale(1));
+
+    // Resets the colors of the bars to the default in the bar chart.
+    detailedBarsRect.style("fill", "rgb(220, 173, 139)");
+
+    // Changes the color of Finland country as an example.
+    detailedBarsRect.filter(d => d.Country === "Finland").style("fill", detailedColorScale(0));
+
+    // Removes all the rows in the comparison table.
+    detailedTable.selectAll(".detailedTableRow").remove();
+
+    let firstCountry = countriesData.slice(0, 1);
+
+    // Adds the Finland country values as an example in the comparison table.
+    detailedTable.append('tr')
+        .attr('id', "FinlandDetailedRow")
+        .data(firstCountry)
+        .selectAll('td')
+        .data(function(row, i) {
+            return tableColumns.map(function(c) {
+                // compute cell values for this specific row
+                let cell = {};
+
+                d3.keys(c).forEach(function(k) {
+                    cell[k] = typeof c[k] == 'function' ? c[k](row,i) : c[k];
+                });
+
+                return cell;
+            });
+        })
+        .enter()
+        .append('td')
+        .html(function (d) {
+            return d.html;
+        })
+        .attr('class', function (d) {
+            return d.cl + " detailedTableRow";
+        });
+
+    // Removes all the lines in the parallel plot.
+    parallelPlot.selectAll(".parallelLine").remove();
+
+    // Extract the list of dimensions to keep in the plot. Keep all except the column called Country.
+    let dimensions = d3.keys(countriesData[0]).filter(function(d) { return d !== "Country" });
+
+    // For each dimension, build a linear scale. Store all in a y object.
+    let y = {};
+
+    for (let i in dimensions) {
+        const name = dimensions[i];
+
+        y[name] = d3.scaleLinear()
+            .domain( d3.extent(countriesData, function(d) { return +d[name]; }) )
+            .range([height, 0])
+    }
+
+    // Build the X scale -> find the best position for each Y axis.
+    let x = d3.scalePoint()
+        .range([0, width])
+        .padding(1)
+        .domain(dimensions);
+
+    // Adds the first country values into the parallel plot.
+    parallelPlot.append("path")
+        .data(firstCountry)
+        .attr("d",  function (d) {
+            return d3.line()(dimensions.map(function(p) { return [x(p), y[p](d[p])]; }));
+        })
+        .attr("id", firstCountry[0].Country.replace(/\s/g, ''))
+        .attr("class", "parallelLine")
+        .style("fill", "none")
+        .style("stroke", detailedColorScale(0));
 }
 
 /*
@@ -270,7 +429,28 @@ function drawDetailedMap(geoData) {
         .attr("cursor", "pointer")
         .on("click", function (d) {
             selectCountryOnDetailedAnalysis(d.properties.name);
+        })
+        .on("mouseover", function (d) {
+            detailedMap.select("#" + d.properties.name.replace(/\s/g, '') + "Tile").style("display", "block");
+        })
+        .on("mouseout", function (d) {
+            detailedMap.select("#" + d.properties.name.replace(/\s/g, '') + "Tile").style("display", "none");
         });
+
+    //Displays the country name.
+    detailedMap.append("g")
+        .selectAll("text")
+        .data(geoData.features)
+        .enter()
+        .append("text")
+        .attr("id", d => d.properties.name.replace(/\s/g, '') + "Tile")
+        .attr("transform", d => `translate(${path.centroid(d)})`)
+        .attr("text-anchor", "middle")
+        .attr("font-size", 5)
+        .style("fill", "solid black")
+        .style("font-weight", "bold")
+        .style("display", "none")
+        .text(d => d.properties.name);
 
     detailedMapPaths.filter(d => d.properties.name === "Finland").style("fill", detailedColorScale(0));
 }
@@ -287,7 +467,7 @@ const detailedColorScale = d3.scaleOrdinal(d3.schemeCategory10);
 // ############## GENERAL ANALYSIS COLORIZED MAP ##############
 // Zoom to be used on the map, in the general analysis section.
 const generalZoom = d3.zoom()
-    .scaleExtent([0.8, 5])
+    .scaleExtent([0.5, 5])
     .on("zoom", function () {
         generalMap.attr("transform", d3.event.transform);
     });
@@ -297,10 +477,13 @@ const generalMap = d3.select("#map")
     .append("svg")
     .attr("height", 500)
     .attr("width", "100%")
+    .style("border", "solid #83d3c9")
     .call(generalZoom)
     .append("g");
 
-const projection = d3.geoMercator().scale(170);
+const projection = d3.geoMercator()
+    .center([54.1095, 22.3964])
+    .scale(170);
 
 const path = d3.geoPath().projection(projection);
 
@@ -343,6 +526,7 @@ const generalTable = d3.select("#table")
     .append("table")
     .attr("class", "table default");
 
+// Adds the headers to the general analysis comparison table
 generalTable.append('thead')
     .append('tr')
         .selectAll('th')
@@ -359,7 +543,7 @@ generalTable.append('thead')
 
 // ############## DETAILED ANALYSIS COLORIZED MAP ##############
 const detailedZoom = d3.zoom()
-    .scaleExtent([0.8, 5])
+    .scaleExtent([0.5, 5])
     .on("zoom", function () {
         detailedMap.attr("transform", d3.event.transform);
     });
@@ -368,6 +552,7 @@ const detailedMap = d3.select("#map2")
     .append("svg")
     .attr("height", 500)
     .attr("width", "100%")
+    .style("border", "solid #83d3c9")
     .call(detailedZoom)
     .append("g");
 
@@ -385,6 +570,7 @@ const detailedTable = d3.select("#table2")
     .append("table")
     .attr("class", "table default");
 
+// Adds the headers to the detailed analysis comparison table
 detailedTable.append('thead')
     .append('tr')
         .selectAll('th')
@@ -430,31 +616,31 @@ d3.csv("assets/world-happiness-report-2019.csv")
             // All countries data to be used in the radar plot.
             radarPlotData.push([
                 { name: item.Country },
-                { axis: "Ladder", value: Math.round(Math.log(item.Ladder) + 1) },
-                { axis: "SD of Ladder", value: Math.round(Math.log(item.SDLadder) + 1) },
-                { axis: "Positive Affect", value: Math.round(Math.log(item.PositiveAffect) + 1) },
-                { axis: "Negative Affect", value: Math.round(Math.log(item.NegativeAffect) + 1) },
-                { axis: "Corruption", value: Math.round(Math.log(item.Corruption) + 1) },
-                { axis: "Freedom", value: Math.round(Math.log(item.Freedom) + 1) },
-                { axis: "GDP per capita", value: Math.round(Math.log(item.GDP) + 1) },
-                { axis: "Generosity", value: Math.round(Math.log(item.Generosity) + 1) },
-                { axis: "Life Expectancy", value: Math.round(Math.log(item.LifeExpectancy) + 1) },
-                { axis: "Social Support", value: Math.round(Math.log(item.SocialSupport) + 1) }
+                { axis: "Ladder", value: Math.round(Math.log(countriesData.length / item.Ladder) + 1) },
+                { axis: "SD of Ladder", value: Math.round(Math.log(countriesData.length / item.SDLadder) + 1) },
+                { axis: "Positive Affect", value: item.PositiveAffect === "" ? 0 : Math.round(Math.log(countriesData.length / item.PositiveAffect) + 1) },
+                { axis: "Negative Affect", value: item.NegativeAffect === "" ? 0 : Math.round(Math.log(countriesData.length / item.NegativeAffect) + 1) },
+                { axis: "Corruption", value: item.Corruption === "" ? 0 : Math.round(Math.log(countriesData.length / item.Corruption) + 1) },
+                { axis: "Freedom", value: item.Freedom === "" ? 0 : Math.round(Math.log(countriesData.length / item.Freedom) + 1) },
+                { axis: "GDP per capita", value: item.GDP === "" ? 0 : Math.round(Math.log(countriesData.length / item.GDP) + 1) },
+                { axis: "Generosity", value: item.Generosity === "" ? 0 : Math.round(Math.log(countriesData.length / item.Generosity) + 1) },
+                { axis: "Life Expectancy", value: item.LifeExpectancy === "" ? 0 : Math.round(Math.log(countriesData.length / item.LifeExpectancy) + 1) },
+                { axis: "Social Support", value: item.SocialSupport === "" ? 0 : Math.round(Math.log(countriesData.length / item.SocialSupport) + 1) }
             ]);
 
             if (index === 0) {
                 // Add the first country as an example to be inserted into the radar plot.
                 selectedCountriesRadarPlot = [[
-                    { axis: "Ladder", value: Math.round(Math.log(item.Ladder) + 1) },
-                    { axis: "SD of Ladder", value: Math.round(Math.log(item.SDLadder) + 1) },
-                    { axis: "Positive Affect", value: Math.round(Math.log(item.PositiveAffect) + 1) },
-                    { axis: "Negative Affect", value: Math.round(Math.log(item.NegativeAffect) + 1) },
-                    { axis: "Corruption", value: Math.round(Math.log(item.Corruption) + 1) },
-                    { axis: "Freedom", value: Math.round(Math.log(item.Freedom) + 1) },
-                    { axis: "GDP per capita", value: Math.round(Math.log(item.GDP) + 1) },
-                    { axis: "Generosity", value: Math.round(Math.log(item.Generosity) + 1) },
-                    { axis: "Life Expectancy", value: Math.round(Math.log(item.LifeExpectancy) + 1) },
-                    { axis: "Social Support", value: Math.round(Math.log(item.SocialSupport) + 1) }
+                    { axis: "Ladder", value: Math.round(Math.log(countriesData.length / item.Ladder) + 1) },
+                    { axis: "SD of Ladder", value: Math.round(Math.log(countriesData.length / item.SDLadder) + 1) },
+                    { axis: "Positive Affect", value: item.PositiveAffect === "" ? 0 : Math.round(Math.log(countriesData.length / item.PositiveAffect) + 1) },
+                    { axis: "Negative Affect", value: item.NegativeAffect === "" ? 0 : Math.round(Math.log(countriesData.length / item.NegativeAffect) + 1) },
+                    { axis: "Corruption", value: item.Corruption === "" ? 0 : Math.round(Math.log(countriesData.length / item.Corruption) + 1) },
+                    { axis: "Freedom", value: item.Freedom === "" ? 0 : Math.round(Math.log(countriesData.length / item.Freedom) + 1) },
+                    { axis: "GDP per capita", value: item.GDP === "" ? 0 : Math.round(Math.log(countriesData.length / item.GDP) + 1) },
+                    { axis: "Generosity", value: item.Generosity === "" ? 0 : Math.round(Math.log(countriesData.length / item.Generosity) + 1) },
+                    { axis: "Life Expectancy", value: item.LifeExpectancy === "" ? 0 : Math.round(Math.log(countriesData.length / item.LifeExpectancy) + 1) },
+                    { axis: "Social Support", value: item.SocialSupport === "" ? 0 : Math.round(Math.log(countriesData.length / item.SocialSupport) + 1) }
                 ]];
 
                 legendOptions.push(item.Country);
@@ -523,7 +709,7 @@ d3.csv("assets/world-happiness-report-2019.csv")
                 return d.html;
             })
             .attr('class', function (d) {
-                return d.cl;
+                return d.cl + " generalTableRow";
             });
 
         // Adds all the countries happiness scores, based on the cartil ladder, into the detailed analysis bar chart.
@@ -585,7 +771,7 @@ d3.csv("assets/world-happiness-report-2019.csv")
                 return d.html;
             })
             .attr('class', function (d) {
-                return d.cl;
+                return d.cl + " detailedTableRow";
             });
 
         // Extract the list of dimensions to keep in the plot. Keep all except the column called Country.
@@ -622,7 +808,7 @@ d3.csv("assets/world-happiness-report-2019.csv")
             .style("text-anchor", "middle")
             .attr("y", -9)
             .text(function(d) { return d; })
-            .style("fill", "white");
+            .style("fill", "black");
 
         // Adds the first country values into the parallel plot.
         parallelPlot.append("path")
@@ -631,6 +817,7 @@ d3.csv("assets/world-happiness-report-2019.csv")
                 return d3.line()(dimensions.map(function(p) { return [x(p), y[p](d[p])]; }));
             })
             .attr("id", firstCountry[0].Country.replace(/\s/g, ''))
+            .attr("class", "parallelLine")
             .style("fill", "none")
             .style("stroke", detailedColorScale(0));
     })

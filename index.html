@@ -81,7 +81,7 @@
 
 				<!-- General Analysis -->
 				<section id="general-analysis" class="wrapper style3 special">
-					<header class="major">
+					<header>
 						<h2><strong>General Analysis</strong></h2>
 						<p>To use our application, you just need to click on a bar in the "Happiness score using cartil ladder" chart, or click on a country in the map.</p>
 					</header>
@@ -90,14 +90,16 @@
 							<section>
 								<header>
 									<h3><u>Happiness Score using Cartil Ladder</u></h3>
+									<small>Higher is better</small>
 								</header>
 								<div id="bar-chart"></div>
 							</section>
 						</div>
-						<div class="col-8  col-12-narrower">
+						<div class="col-8 col-12-narrower">
 							<section>
 								<header>
 									<h3><u>Overall Statistics</u></h3>
+									<small>Higher is better</small>
 								</header>
 								<div id="radar-plot"></div>
 							</section>
@@ -107,20 +109,23 @@
 						<div class="col-4 col-12-narrower">
 							<section>
 								<header>
-									<h3><u>Map</u></h3>
+									<h3><u>Colorized Map</u></h3>
 								</header>
-								<ul class="buttons">
-									<li><a id="btn-clear" class="button small" onclick="resetGeneralMap()">Reset</a></li>
-									<li><a id="btn-zoom-in" class="button small">+</a></li>
-									<li><a id="btn-zoom-out" class="button small">-</a></li>
-								</ul>
-								<div id="map"></div>
+								<div class="row">
+									<div id="map" class="col-11"></div>
+									<ul class="buttons col-1">
+										<li><a id="btn-clear" class="button small" onclick="resetGeneralMap()">Reset</a></li>
+										<li><a id="btn-zoom-in" class="button small">+</a></li>
+										<li><a id="btn-zoom-out" class="button small">-</a></li>
+									</ul>
+								</div>
 							</section>
 						</div>
 						<div class="col-8 col-12-narrower">
 							<section>
 								<header>
 									<h3><u>Comparison Table</u></h3>
+									<small>Lower is better</small>
 								</header>
 								<div id="table"></div>
 							</section>
@@ -130,7 +135,7 @@
 
 				<!-- Detailed Analysis -->
 				<section id="detailed-analysis" class="wrapper style3 special">
-					<header class="major">
+					<header>
 						<h2><strong>Detailed Analysis</strong></h2>
 						<p>To use our application, you just need to click on a bar in the "Happiness score using cartil ladder" chart, or click on a country in the map.</p>
 					</header>
@@ -139,14 +144,16 @@
 							<section>
 								<header>
 									<h3><u>Happiness Score using Cartil Ladder</u></h3>
+									<small>Higher is better</small>
 								</header>
 								<div id="bar-chart2"></div>
 							</section>
 						</div>
-						<div class="col-8  col-12-narrower">
+						<div class="col-8 col-12-narrower">
 							<section>
 								<header>
 									<h3><u>Overall Statistics</u></h3>
+									<small>Lower is better</small>
 								</header>
 								<div id="parallel-plot"></div>
 							</section>
@@ -156,20 +163,23 @@
 						<div class="col-4 col-12-narrower">
 							<section>
 								<header>
-									<h3><u>Map</u></h3>
+									<h3><u>Colorized Map</u></h3>
 								</header>
-								<ul class="buttons">
-									<li><a id="btn-clear2" class="button small" onclick="resetDetailedMap()">Reset</a></li>
-									<li><a id="btn-zoom-in2" class="button small">+</a></li>
-									<li><a id="btn-zoom-out2" class="button small">-</a></li>
-								</ul>
-								<div id="map2"></div>
+								<div class="row">
+									<div id="map2" class="col-11"></div>
+									<ul class="buttons col-1">
+										<li><a id="btn-clear2" class="button small" onclick="resetDetailedMap()">Reset</a></li>
+										<li><a id="btn-zoom-in2" class="button small">+</a></li>
+										<li><a id="btn-zoom-out2" class="button small">-</a></li>
+									</ul>
+								</div>
 							</section>
 						</div>
 						<div class="col-8 col-12-narrower">
 							<section>
 								<header>
 									<h3><u>Comparison Table</u></h3>
+									<small>Lower is better</small>
 								</header>
 								<div id="table2"></div>
 							</section>
