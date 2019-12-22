@@ -9,11 +9,9 @@ Free for personal and commercial use under the CCA 3.0 license (html5up.net/lice
 This is Twenty, a minimal, multi-page responsive site template for HTML5 UP.
 Fully responsive, built on HTML5/CSS3, and CCA licensed.
 
-Credits:
-	
-	* Icons:
+Credits: * Icons:
 		* Font Awesome (fontawesome.io)
-	* Other:
+	 * Other:
 		* jQuery (jquery.com)
 		* Scrollex (github.com/ajlkn/jquery.scrollex)
 		* Responsive Tools (github.com/ajlkn/responsive-tools)
