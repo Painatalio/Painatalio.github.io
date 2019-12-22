@@ -14,11 +14,12 @@ function selectCountryOnGeneralAnalysis(countryName) {
 
             // Changes the color of the country bar, in the bar chart, to the default color.
             generalBarsRect.filter(d => d.Country === countryName).style("fill", "rgb(220, 173, 139)");
+            console.log(legendOptions);
 
             // Removes the row, in the comparison table, corresponding to the country,
             // if there's more than one selected country.
             if (legendOptions.length > 1) {
-                generalTable.select("#" + countryName.replace(/\s/g, '') + "GeneralRow").remove();
+                generalTable.selectAll("#" + countryName.replace(/\s/g, '') + "GeneralRow").remove();
             }
 
             // Removes the country values from the radar plot, and updates the available colors to use.
@@ -46,6 +47,7 @@ function selectCountryOnGeneralAnalysis(countryName) {
             // Adds the selected country values as a row in the comparison table.
             generalTable.append('tr')
                 .attr('id', countryName.replace(/\s/g, '') + "GeneralRow")
+                .attr("class", "generalTableRow")
                 .data(selectedCountry)
                 .selectAll('td')
                 .data(function(row, i) {
@@ -66,7 +68,7 @@ function selectCountryOnGeneralAnalysis(countryName) {
                     return d.html;
                 })
                 .attr('class', function (d) {
-                    return d.cl + " generalTableRow";
+                    return d.cl;
                 });
 
             // Inserts the country values into the radar plot.
@@ -128,6 +130,7 @@ function resetGeneralMap() {
     // Adds the Finland country values as an example in the comparison table.
     generalTable.append('tr')
         .attr('id', "FinlandGeneralRow")
+        .attr("class", "generalTableRow")
         .data(firstCountry)
         .selectAll('td')
         .data(function(row, i) {
@@ -148,16 +151,18 @@ function resetGeneralMap() {
             return d.html;
         })
         .attr('class', function (d) {
-            return d.cl + " generalTableRow";
+            return d.cl;
         });
 
     firstCountry = Object.create(radarPlotData[0]);
+
+    selectedCountriesRadarPlot = [firstCountry];
 
     // Resets the countries present on the radar plot legend.
     legendOptions = [firstCountry.splice(0, 1)[0].name];
 
     // Draws the radar plot with only the Finland country as an example.
-    drawRadarCharts([firstCountry], legendOptions);
+    drawRadarCharts(selectedCountriesRadarPlot, legendOptions);
 }
 
 /*
@@ -255,6 +260,7 @@ function selectCountryOnDetailedAnalysis(countryName) {
             // Inserts the country's data in a row of the table.
             detailedTable.append('tr')
                 .attr('id', countryName.replace(/\s/g, '') + "DetailedRow")
+                .attr("class", "detailedTableRow")
                 .data(selectedCountry)
                 .selectAll('td')
                 .data(function(row, i) {
@@ -275,7 +281,7 @@ function selectCountryOnDetailedAnalysis(countryName) {
                         return d.html;
                     })
                     .attr('class', function (d) {
-                        return d.cl + " detailedTableRow";
+                        return d.cl;
                     });
 
             // Extract the list of dimensions to keep in the plot. Keep all except the column called Country.
@@ -343,6 +349,7 @@ function resetDetailedMap() {
     // Adds the Finland country values as an example in the comparison table.
     detailedTable.append('tr')
         .attr('id', "FinlandDetailedRow")
+        .attr("class", "detailedTableRow")
         .data(firstCountry)
         .selectAll('td')
         .data(function(row, i) {
@@ -363,7 +370,7 @@ function resetDetailedMap() {
             return d.html;
         })
         .attr('class', function (d) {
-            return d.cl + " detailedTableRow";
+            return d.cl;
         });
 
     // Removes all the lines in the parallel plot.
@@ -689,6 +696,7 @@ d3.csv("assets/world-happiness-report-2019.csv")
         // Adds the first country values as a row in the general analysis comparison table.
         generalTable.append('tr')
             .attr('id', firstCountry[0].Country.replace(/\s/g, '') + "GeneralRow")
+            .attr("class", "generalTableRow")
             .data(firstCountry)
             .selectAll('td')
             .data(function(row, i) {
@@ -709,7 +717,7 @@ d3.csv("assets/world-happiness-report-2019.csv")
                 return d.html;
             })
             .attr('class', function (d) {
-                return d.cl + " generalTableRow";
+                return d.cl;
             });
 
         // Adds all the countries happiness scores, based on the cartil ladder, into the detailed analysis bar chart.
@@ -751,6 +759,7 @@ d3.csv("assets/world-happiness-report-2019.csv")
         // Adds the first country values as a row in the detailed analysis comparison table.
         detailedTable.append('tr')
             .attr('id', firstCountry[0].Country.replace(/\s/g, '') + "DetailedRow")
+            .attr("class", "detailedTableRow")
             .data(firstCountry)
             .selectAll('td')
             .data(function(row, i) {
@@ -771,7 +780,7 @@ d3.csv("assets/world-happiness-report-2019.csv")
                 return d.html;
             })
             .attr('class', function (d) {
-                return d.cl + " detailedTableRow";
+                return d.cl;
             });
 
         // Extract the list of dimensions to keep in the plot. Keep all except the column called Country.
