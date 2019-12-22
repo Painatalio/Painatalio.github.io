@@ -12,7 +12,6 @@ Fully responsive, built on HTML5/CSS3, and CCA licensed.
 Credits:
 	* Icons:
 		* Font Awesome (fontawesome.io)
-
 	* Other:
 		* jQuery (jquery.com)
 		* Scrollex (github.com/ajlkn/jquery.scrollex)
