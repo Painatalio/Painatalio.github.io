@@ -25,7 +25,7 @@ Credits:
 
 ### How to run the project
 
-The single page application is online and available at https://painatalio.github.io/, however if there's need to run it locally, 
+The single page application is online and available at https://pjfer.github.io/, however if there's need to run it locally, 
 it's only necessary to go inside the project main folder and run the following command:
 
 ```bash
